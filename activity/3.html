@@ -9,7 +9,7 @@ details{margin-top:20px;background:#fff;border-radius:12px;padding:10px 14px}sum
 <details><summary>교사용 안내 (한국어)</summary><h3>준비</h3><p>첨부 3차시 메모리 카드.pdf: A4 가로, 실제 크기 100%, 양면 인쇄 &quot;짧은 쪽 넘김&quot;, 두꺼운 종이(180–200g) 권장. 5장 = 1세트(20쌍·40장, 카드 56×87mm). 4명당 1세트. 미리 재단·고무줄 보관. 시간 20분.</p><h3>규칙</h3><p>① 4명씩 앉아 카드를 모두 뒤집어 섞어 펼친다 ② 한 명씩 돌아가며 자기 차례에 2장을 뒤집는다 ③ 같은 징조면 그 2장을 가져간다 = 1점 (징조 이름을 소리 내어 말하기) ④ 다르면 다시 덮고 다음 사람 차례 ⑤ 카드가 다 없어질 때까지 계속 ⑥ 끝나면 각자 짝 수를 세어 점수 확인 → 다 함께 &quot;Be ready! Jesus is coming!&quot;</p><h3>시간 조절</h3><p>20쌍(40장)을 다 하면 20분 넘게 걸릴 수 있다. 시간이 짧으면 10–12쌍만 골라 깐다. 마지막 1–2쌍이 남으면 교사가 &quot;마지막 차례&quot;로 정리.</p><h3>점수 후</h3><p>동점이면 &quot;모두 잘했어요(Great job, everyone!)&quot;로 넘어간다. 1등만 칭찬하지 않는다. 각자 가져간 카드 중 하나를 골라 &quot;이건 ○○ 징조예요&quot;를 말하게 하고, 교사가 &quot;Be Ready!&quot;(마 24:42)와 &quot;Gospel to the Whole World&quot;(마 24:14) 카드를 들어 정리.</p><h3>핵심 말</h3><p>&quot;예수님은 우리를 겁주려고가 아니라 준비하라고 징조를 알려 주셨어요. 가장 큰 징조는 복음이 온 세상에 전해지는 것(마 24:14). 그 날은 아버지만 아세요(마 24:36).&quot;</p><h3>카드 설명</h3><p>&quot;Nation Against Nation&quot; 카드의 국기는 &quot;나라와 나라가 맞선다&quot;는 그림일 뿐 특정 나라가 나쁘다는 뜻이 아니라고 말한다. 전쟁·지진·전염병 카드에 불안해하는 아이에게는 &quot;Be Ready!&quot;와 &quot;The Return of Jesus&quot; 카드를 함께 보여 준다.</p><h3>자료</h3><p>첨부 3차시 메모리 카드.pdf (A4 5장 양면)</p></details>
 <p style="margin-top:18px"><a href="../">← All audio tracks</a></p></main>
 <div id="ctl"><button id="play">▶ Play</button><button id="stop">■ Stop</button></div>
-
+<audio id="au" src="a3.mp3" preload="auto"></audio>
 <script>
 const L=[...document.querySelectorAll('.l')];const au=document.getElementById('au');
 function mark(i){L.forEach(x=>x.classList.remove('on'));if(L[i]){L[i].classList.add('on');L[i].scrollIntoView({block:'center',behavior:'smooth'});}}
@@ -19,5 +19,5 @@ const v=speechSynthesis.getVoices().find(v=>/en(-|_)(US|GB|PH)/i.test(v.lang));i
 document.getElementById('play').onclick=()=>{if(au){au.play();return;}speechSynthesis.cancel();stopped=false;i=0;sayNext();};
 document.getElementById('stop').onclick=()=>{stopped=true;if(au){au.pause();au.currentTime=0;}speechSynthesis.cancel();mark(-1);};
 L.forEach((x,k)=>x.onclick=()=>{if(au)return;speechSynthesis.cancel();stopped=false;i=k;sayNext();});
-if('serviceWorker' in navigator)navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(()=>caches.open('bible-audio-v1')).then(c=>c.addAll(['1.html','2.html','3.html','4.html','5.html'].map(f=>new URL(f,location).href))).catch(()=>{});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(()=>caches.open('bible-audio-v1')).then(c=>c.addAll(["1.html", "2.html", "3.html", "4.html", "5.html", "a1.mp3", "a3.mp3"].map(f=>new URL(f,location).href))).catch(()=>{});
 </script></body></html>
