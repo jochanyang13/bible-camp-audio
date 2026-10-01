@@ -19,4 +19,5 @@ const v=speechSynthesis.getVoices().find(v=>/en(-|_)(US|GB|PH)/i.test(v.lang));i
 document.getElementById('play').onclick=()=>{if(au){au.play();return;}speechSynthesis.cancel();stopped=false;i=0;sayNext();};
 document.getElementById('stop').onclick=()=>{stopped=true;if(au){au.pause();au.currentTime=0;}speechSynthesis.cancel();mark(-1);};
 L.forEach((x,k)=>x.onclick=()=>{if(au)return;speechSynthesis.cancel();stopped=false;i=k;sayNext();});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(()=>caches.open('bible-audio-v1')).then(c=>c.addAll(['1.html','2.html','3.html','4.html','5.html'].map(f=>new URL(f,location).href))).catch(()=>{});
 </script></body></html>
