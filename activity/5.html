@@ -9,7 +9,7 @@ details{margin-top:20px;background:#fff;border-radius:12px;padding:10px 14px}sum
 <details><summary>교사용 안내 (한국어)</summary><h3>준비</h3><p>현지 교회와 사전 합의(자리·물·도구 보관·주간 담당 리더 1–2명). 흙·화분(페트병·아이스크림 통·마대 가능)·씨앗/모종·물뿌리개·이름표. 아이용 Garden card·Weekly log(05 활동자료 2–3쪽)·현지 리더용 영어 안내(4쪽). 시간 30분.</p><h3>쉬운 작물</h3><p>우기(9월)에도 잘 되는 것: 녹두(monggo, 2–3일 발아), 페차이(pechay, 25–30일 수확), 깡콩(kangkong, 줄기 꺾꽂이, 물 좋아함), 고구마순(talbos ng kamote, 꺾꽂이), 오크라(okra, 45–50일), 말룽가이(malunggay, 꺾꽂이·다년생). 씨앗 2–3개씩, 1–2cm 깊이.</p><h3>진행</h3><p>① 3–4명 한 조, 조별 화분 ② 씨앗 심기·물 주기 ③ 이름표와 Garden card 작성 ④ 역할 정하기(물 주기·풀 뽑기·살펴보기·기록하기) ⑤ 1주차 기록 ⑥ 고전 3:6 함께 읽고 기도</p><h3>매주(현지 리더)</h3><p>30분: 모여 기도(3) → 이번 주 정원 성구(5) → 역할별 일(15) → 기록·나눔(5) → 수확하면 가족·이웃과 나누기. 8주 성구는 Weekly log에 있음.</p><h3>씨앗 말고도</h3><p>&quot;말씀 씨앗 병&quot;(매주 성구 쪽지 하나씩 넣고 외우기), 기도 짝 벽(이름 짝을 붙이고 한 주 동안 기도), 교회 청소·꽃 가꾸기, 수확 나눔 날, 집에서 콩나물 컵 키우기, 3번째 주마다 사진 한 장을 교회 단체방에 공유(얼굴은 보호자 동의 시). 하나만 골라도 매주 모일 이유가 된다.</p><h3>인계</h3><p>떠나기 전 현지 리더에게: 화분 위치·물 주는 날·도구 보관·연락처·Leader guide 출력본 전달. 비가 많은 날은 화분을 처마 아래로(침수 대비 높은 곳). 싹이 안 나도 &quot;기다림도 배움&quot;으로.</p><h3>자료</h3><p>05 활동자료 2–4쪽 (Garden card · Weekly log · Leader guide)</p></details>
 <p style="margin-top:18px"><a href="../">← All audio tracks</a></p></main>
 <div id="ctl"><button id="play">▶ Play</button><button id="stop">■ Stop</button></div>
-
+<audio id="au" src="a5.mp3" preload="auto"></audio>
 <script>
 const L=[...document.querySelectorAll('.l')];const au=document.getElementById('au');
 function mark(i){L.forEach(x=>x.classList.remove('on'));if(L[i]){L[i].classList.add('on');L[i].scrollIntoView({block:'center',behavior:'smooth'});}}
@@ -19,5 +19,5 @@ const v=speechSynthesis.getVoices().find(v=>/en(-|_)(US|GB|PH)/i.test(v.lang));i
 document.getElementById('play').onclick=()=>{if(au){au.play();return;}speechSynthesis.cancel();stopped=false;i=0;sayNext();};
 document.getElementById('stop').onclick=()=>{stopped=true;if(au){au.pause();au.currentTime=0;}speechSynthesis.cancel();mark(-1);};
 L.forEach((x,k)=>x.onclick=()=>{if(au)return;speechSynthesis.cancel();stopped=false;i=k;sayNext();});
-if('serviceWorker' in navigator)navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(()=>caches.open('bible-audio-v1')).then(c=>c.addAll(["1.html", "2.html", "3.html", "4.html", "5.html", "a1.mp3", "a3.mp3"].map(f=>new URL(f,location).href))).catch(()=>{});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(()=>caches.open('bible-audio-v1')).then(c=>c.addAll(["1.html", "2.html", "3.html", "4.html", "5.html", "a1.mp3", "a2.mp3", "a3.mp3", "a4.mp3", "a5.mp3"].map(f=>new URL(f,location).href))).catch(()=>{});
 </script></body></html>
