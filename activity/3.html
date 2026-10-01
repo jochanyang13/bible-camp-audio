@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lesson 3 activity – Signs memory game</title><meta name="theme-color" content="#DB8029">
+<style>body{font-family:system-ui,sans-serif;margin:0;background:#f7f7f2;color:#222}header{background:#DB8029;color:#fff;padding:16px}header small{opacity:.85}h1{margin:4px 0 0;font-size:22px}
+main{padding:12px 16px 120px;max-width:720px;margin:auto}.l{font-size:19px;line-height:1.5;background:#fff;border-radius:12px;padding:10px 14px;margin:8px 0;box-shadow:0 1px 3px #0001}.l.on{outline:3px solid #F6C453}
+#ctl{position:fixed;bottom:0;left:0;right:0;background:#fff;box-shadow:0 -2px 8px #0002;padding:10px;display:flex;gap:8px;justify-content:center}button{font-size:17px;border:0;border-radius:12px;padding:12px 18px;background:#F6C453;font-weight:700}#stop{background:#eee}
+details{margin-top:20px;background:#fff;border-radius:12px;padding:10px 14px}summary{font-weight:700;font-size:16px}details h3{margin:12px 0 4px;font-size:15px;color:#DB8029}details p{margin:0;font-size:15px;line-height:1.55}a{color:#DB8029}</style></head>
+<body><header><small>MY BIBLE CAMP · LESSON 3 ACTIVITY</small><h1>Signs memory game</h1><small>마지막 시대 징조 메모리 게임</small></header>
+<main><p style="color:#555">Press ▶ and let everyone listen. The teacher can pause after each step.</p><p class="l" data-i="0">Lesson three activity. The signs memory game.</p><p class="l" data-i="1">Sit in a small group. Put all the cards face down. Mix them up.</p><p class="l" data-i="2">Take turns. Turn over two cards. If the pictures match, read the sign and the Bible verse aloud. Keep the pair, and go again.</p><p class="l" data-i="3">If they do not match, turn them back over. Now it is the next friend’s turn.</p><p class="l" data-i="4">Remember where the cards are!</p><p class="l" data-i="5">Jesus told us these signs so we can be ready, not afraid.</p><p class="l" data-i="6">The biggest sign is the good news going to the whole world. Matthew twenty-four, verse fourteen.</p><p class="l" data-i="7">When the game ends, everyone says together: Be ready! Jesus is coming!</p><p class="l" data-i="8">Only the Father knows the day. So we trust Jesus and love our neighbors every day.</p>
+<details><summary>교사용 안내 (한국어)</summary><h3>준비</h3><p>첨부 3차시 메모리 카드.pdf: A4 가로, 실제 크기 100%, 양면 인쇄 &quot;짧은 쪽 넘김&quot;, 두꺼운 종이(180–200g) 권장. 5장 = 1세트(20쌍·40장, 카드 56×87mm). 4명당 1세트. 미리 재단·고무줄 보관. 시간 20분.</p><h3>진행</h3><p>① 4명씩 앉기 ② 카드를 뒤집어 섞어 펼치기(시간이 짧으면 10–12쌍만) ③ 차례대로 2장 뒤집기 ④ 짝이 맞으면 카드 제목과 성경 구절을 소리 내어 읽고 가져가며 한 번 더 ⑤ 다 찾으면 다 함께 &quot;Be ready! Jesus is coming!&quot;</p><h3>핵심 말</h3><p>&quot;예수님은 우리를 겁주려고가 아니라 준비하라고 징조를 알려 주셨어요. 가장 큰 징조는 복음이 온 세상에 전해지는 것(마 24:14). 그 날은 아버지만 아세요(마 24:36).&quot;</p><h3>카드 설명</h3><p>&quot;Nation Against Nation&quot; 카드의 국기는 &quot;나라와 나라가 맞선다&quot;는 그림일 뿐 특정 나라가 나쁘다는 뜻이 아니라고 말한다. 전쟁·지진·전염병 카드에 불안해하는 아이에게는 &quot;Be Ready!&quot; 카드(마 24:42)와 &quot;The Return of Jesus&quot; 카드를 함께 보여 준다.</p><h3>변형</h3><p>시간이 남으면 &quot;징조 말하기&quot;: 짝을 찾은 아이가 그 징조를 영어 한 문장으로 말하기(예: Love grows cold).</p><h3>자료</h3><p>첨부 3차시 메모리 카드.pdf (A4 5장 양면)</p></details>
+<p style="margin-top:18px"><a href="../">← All audio tracks</a></p></main>
+<div id="ctl"><button id="play">▶ Play</button><button id="stop">■ Stop</button></div>
+
+<script>
+const L=[...document.querySelectorAll('.l')];const au=document.getElementById('au');
+function mark(i){L.forEach(x=>x.classList.remove('on'));if(L[i]){L[i].classList.add('on');L[i].scrollIntoView({block:'center',behavior:'smooth'});}}
+let i=0,stopped=true;
+function sayNext(){if(stopped||i>=L.length){mark(-1);return;}mark(i);const u=new SpeechSynthesisUtterance(L[i].textContent);u.lang='en-US';u.rate=.88;
+const v=speechSynthesis.getVoices().find(v=>/en(-|_)(US|GB|PH)/i.test(v.lang));if(v)u.voice=v;u.onend=()=>{i++;setTimeout(sayNext,700)};speechSynthesis.speak(u);}
+document.getElementById('play').onclick=()=>{if(au){au.play();return;}speechSynthesis.cancel();stopped=false;i=0;sayNext();};
+document.getElementById('stop').onclick=()=>{stopped=true;if(au){au.pause();au.currentTime=0;}speechSynthesis.cancel();mark(-1);};
+L.forEach((x,k)=>x.onclick=()=>{if(au)return;speechSynthesis.cancel();stopped=false;i=k;sayNext();});
+</script></body></html>
