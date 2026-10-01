@@ -9,7 +9,7 @@ details{margin-top:20px;background:#fff;border-radius:12px;padding:10px 14px}sum
 <details><summary>교사용 안내 (한국어)</summary><h3>준비</h3><p>A4 활동지(아이 1장), 색연필·연필. 시간 20–25분.</p><h3>진행</h3><p>① 얼굴 그리기·이름·닉네임(5분) ② 좋아하는 것/싫어하는 것·꿈(5분) ③ 인생 길: 지금 → 5년 → 10년 → 50년 → 그 후(5분) ④ &quot;영원히 행복할까요?&quot; 동그라미 ⑤ 초록 상자(시 16:11)·파란 상자(요 14:6)를 함께 읽기 ⑥ 맨 아래 궁금한 것 쓰기</p><h3>핵심 말</h3><p>&quot;50년 뒤에도 우리 몸은 늙고 언젠가 흙으로 돌아가요. 그런데 영혼은 하나님께로 가요(전 12:7). 진짜 행복은 하나님과 영원히 함께 있는 것이에요. 그 길이 예수님이에요(요 14:6). 이번 주에 그 길을 함께 배워요.&quot;</p><h3>연결</h3><p>1차시 주제(몸과 영혼)의 적용. 4차시(죄와 복음)·5차시(새 사람)에서 &quot;나는 어디로 가나요?&quot;의 답을 다시 열어 본다.</p><h3>유의</h3><p>겁주지 않는다. &quot;아니요/잘 모르겠어요&quot;에 표시한 아이를 지적하지 않는다. 가정 형편·장래 직업으로 비교하지 않는다. 발표는 원하는 아이만. 활동지는 5일 동안 보관했다가 5차시에 다시 펴서 &quot;이제 답을 알았나요?&quot;로 마무리.</p><h3>자료</h3><p>05 활동자료 1쪽</p></details>
 <p style="margin-top:18px"><a href="../">← All audio tracks</a></p></main>
 <div id="ctl"><button id="play">▶ Play</button><button id="stop">■ Stop</button></div>
-
+<audio id="au" src="a1.mp3" preload="auto"></audio>
 <script>
 const L=[...document.querySelectorAll('.l')];const au=document.getElementById('au');
 function mark(i){L.forEach(x=>x.classList.remove('on'));if(L[i]){L[i].classList.add('on');L[i].scrollIntoView({block:'center',behavior:'smooth'});}}
@@ -19,5 +19,5 @@ const v=speechSynthesis.getVoices().find(v=>/en(-|_)(US|GB|PH)/i.test(v.lang));i
 document.getElementById('play').onclick=()=>{if(au){au.play();return;}speechSynthesis.cancel();stopped=false;i=0;sayNext();};
 document.getElementById('stop').onclick=()=>{stopped=true;if(au){au.pause();au.currentTime=0;}speechSynthesis.cancel();mark(-1);};
 L.forEach((x,k)=>x.onclick=()=>{if(au)return;speechSynthesis.cancel();stopped=false;i=k;sayNext();});
-if('serviceWorker' in navigator)navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(()=>caches.open('bible-audio-v1')).then(c=>c.addAll(['1.html','2.html','3.html','4.html','5.html'].map(f=>new URL(f,location).href))).catch(()=>{});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(()=>caches.open('bible-audio-v1')).then(c=>c.addAll(["1.html", "2.html", "3.html", "4.html", "5.html", "a1.mp3", "a3.mp3"].map(f=>new URL(f,location).href))).catch(()=>{});
 </script></body></html>
