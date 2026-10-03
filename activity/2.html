@@ -1,23 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lesson 2 activity – Noah’s ark animals</title><meta name="theme-color" content="#29997A">
-<style>body{font-family:system-ui,sans-serif;margin:0;background:#f7f7f2;color:#222}header{background:#29997A;color:#fff;padding:16px}header small{opacity:.85}h1{margin:4px 0 0;font-size:22px}
-main{padding:12px 16px 120px;max-width:720px;margin:auto}.l{font-size:19px;line-height:1.5;background:#fff;border-radius:12px;padding:10px 14px;margin:8px 0;box-shadow:0 1px 3px #0001}.l.on{outline:3px solid #F6C453}
-#ctl{position:fixed;bottom:0;left:0;right:0;background:#fff;box-shadow:0 -2px 8px #0002;padding:10px;display:flex;gap:8px;justify-content:center}button{font-size:17px;border:0;border-radius:12px;padding:12px 18px;background:#F6C453;font-weight:700}#stop{background:#eee}
-details{margin-top:20px;background:#fff;border-radius:12px;padding:10px 14px}summary{font-weight:700;font-size:16px}details h3{margin:12px 0 4px;font-size:15px;color:#29997A}details p{margin:0;font-size:15px;line-height:1.55}a{color:#29997A}</style></head>
-<body><header><small>MY BIBLE CAMP · LESSON 2 ACTIVITY</small><h1>Noah’s ark animals</h1><small>노아의 방주 동물 색칠·오리기</small></header>
-<main><p style="color:#555">Press ▶ and let everyone listen. The teacher can pause after each step.</p><p class="l" data-i="0">Lesson two activity. Noah’s ark.</p><p class="l" data-i="1">Look at your animal page. Choose three or four animal pairs. Color them.</p><p class="l" data-i="2">Why pairs? The Bible says: two by two they went into the ark to Noah, male and female, as God had commanded Noah. Genesis seven, verse nine.</p><p class="l" data-i="3">Cut out the animals along the dashed lines. Be careful with your scissors.</p><p class="l" data-i="4">Now cut out the ark along the solid outer line. Fold it in half on the dashed line.</p><p class="l" data-i="5">Glue the two sides, but leave the roof open. Your ark is a pocket.</p><p class="l" data-i="6">Color the two rainbow handles and glue them inside the ark. The rainbow is the sign of God’s promise.</p><p class="l" data-i="7">Look at the people card. Draw one special person you want to take into the ark. You can pray for that person.</p><p class="l" data-i="8">The ark had only one door. Jesus said: I am the door. If anyone enters by Me, he will be saved, and will go in and out and find pasture. John ten, verse nine.</p><p class="l" data-i="9">Put your animals and your person inside. Take your ark home and tell the story.</p>
-<details><summary>교사용 안내 (한국어)</summary><h3>준비</h3><p>첨부 2차시 노아방주.pdf를 A3 가로·실제 크기 100%로 인쇄(1쪽 방주, 2쪽 동물·무지개 손잡이·사람 카드). A3가 없으면 A4로 &quot;용지에 맞춤&quot; 인쇄(크기 약 71%). 가위·풀(또는 스테이플러)·색연필. 시간 25–30분.</p><h3>진행</h3><p>① 동물 3–4쌍 고르고 색칠 ② 점선 따라 오리기 ③ 방주 바깥 실선 오리기 → 점선 반 접기 → 양옆만 붙이고 지붕은 열어 둠 ④ 무지개 손잡이 색칠 → 안쪽 양옆에 붙이기 ⑤ 사람 카드에 데려가고 싶은 사람 그리기·이름·이유 ⑥ 동물과 사람 카드를 방주에 넣기</p><h3>핵심 말</h3><p>&quot;하나님은 짐승을 둘씩 방주로 들이셨어요(창 7:9). 방주에는 문이 하나뿐이었어요. 예수님은 내가 문이라고 하셨어요(요 10:9). 사람 카드에 그린 사람을 위해 기도해요.&quot;</p><h3>도움</h3><p>저학년·손이 느린 아이는 방주 바깥선을 교사가 미리 오려 둔다. 가위 사용 시 앉아서. 남은 동물은 나눠 주지 말고 수거(분쟁 방지).</p><h3>유의</h3><p>사람 카드에 돌아가신 가족을 그린 아이가 있으면 &quot;그분을 많이 사랑하는구나&quot;로 받아 주고 구원 여부를 말하지 않는다.</p><h3>자료</h3><p>첨부 2차시 노아방주.pdf (A3 2장)</p></details>
-<p style="margin-top:18px"><a href="../">← All audio tracks</a></p></main>
-<div id="ctl"><button id="play">▶ Play</button><button id="stop">■ Stop</button></div>
-<audio id="au" src="a2.mp3" preload="auto"></audio>
-<script>
-const L=[...document.querySelectorAll('.l')];const au=document.getElementById('au');
-function mark(i){L.forEach(x=>x.classList.remove('on'));if(L[i]){L[i].classList.add('on');L[i].scrollIntoView({block:'center',behavior:'smooth'});}}
-let i=0,stopped=true;
-function sayNext(){if(stopped||i>=L.length){mark(-1);return;}mark(i);const u=new SpeechSynthesisUtterance(L[i].textContent);u.lang='en-US';u.rate=.88;
-const v=speechSynthesis.getVoices().find(v=>/en(-|_)(US|GB|PH)/i.test(v.lang));if(v)u.voice=v;u.onend=()=>{i++;setTimeout(sayNext,700)};speechSynthesis.speak(u);}
-document.getElementById('play').onclick=()=>{if(au){au.play();return;}speechSynthesis.cancel();stopped=false;i=0;sayNext();};
-document.getElementById('stop').onclick=()=>{stopped=true;if(au){au.pause();au.currentTime=0;}speechSynthesis.cancel();mark(-1);};
-L.forEach((x,k)=>x.onclick=()=>{if(au)return;speechSynthesis.cancel();stopped=false;i=k;sayNext();});
-if('serviceWorker' in navigator)navigator.serviceWorker.register('../sw.js',{scope:'../'}).then(()=>caches.open('bible-audio-v2')).then(c=>c.addAll(["1.html", "2.html", "3.html", "6.html", "4.html", "5.html", "7.html", "a1.mp3", "a2.mp3", "a3.mp3", "a4.mp3"].map(f=>new URL(f,location).href))).catch(()=>{});
-</script></body></html>
+<!doctype html>
+<html lang="ko" data-root="../"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>My Bible Camp · 교사 네비</title>
+<link rel="manifest" href="../manifest.webmanifest"><meta name="theme-color" content="#1F3B73">
+<link rel="stylesheet" href="../nav/app.css?v=2fb50d764755">
+</head><body data-route="A2"><div id="app"><p class="loading">불러오는 중…</p></div>
+<script src="../nav/app.js?v=2fb50d764755"></script></body></html>
