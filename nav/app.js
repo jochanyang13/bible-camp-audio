@@ -1,5 +1,5 @@
 /* My Bible Camp · 교사 네비게이션 (인터넷 없이도 동작)
-   #37 = 어린이 교재(인쇄본) 37쪽 · #L4 = 4차시 순서 · #A5 = 활동 5 · #home = 처음 */
+   #40 = 어린이 교재(인쇄본 72쪽) 40쪽 · #L4 = 4차시 순서 · #A5 = 활동 5 · #home = 처음 */
 (()=>{'use strict';
 const ROOT=document.documentElement.dataset.root||'./';
 const FIXED=document.body.dataset.route||'';
@@ -24,6 +24,7 @@ function route(){
   if(!h&&FIXED)h=FIXED;scrollTo(0,0);
   if(/^\d+$/.test(h))return viewPage(+h);
   if(/^L[1-5]$/.test(h))return viewLesson(+h[1]);
+  if(h==='R')return viewAppendix();
   if(/^A\d$/.test(h))return viewAct(+h.slice(1));
   viewHome();
 }
@@ -38,11 +39,13 @@ function footer(){return '<footer>Scripture taken from the New King James Versio
 /* ---------- 쪽 화면 ---------- */
 function viewPage(no){
   const p=DATA.pages[no];if(!p)return viewHome();
-  const L=p.day?DATA.lessons[p.day-1]:null,ps=L?L.pages:[],i=ps.indexOf(no);
-  const prev=L?(i>0?ps[i-1]:null):(no>1?no-1:null),next=L?(i<ps.length-1?ps[i+1]:null):(no<64?no+1:null);
-  let h=head(L?L.color:'#1F3B73',L?`${L.n}차시 · ${L.ko}`:'MY BIBLE CAMP',`어린이 교재 ${no}쪽`,p.en+(p.ko&&p.ko!==p.en?' · '+p.ko:''),L?`#L${L.n}`:'#home',L?'☰ 차시 순서':'☰ 처음');
-  if(L)h+='<nav class="dots">'+ps.map(n=>`<a href="#${n}" class="${n===no?'on':''}${DATA.pages[n].audio?'':' na'}">${n}</a>`).join('')+'</nav>';
-  if(p.step)h+=`<div class="step"><b>${esc(p.step)}</b>${p.min?` <span>· 약 ${p.min}분</span>`:''}${L?` <span class="of">${i+1}/${ps.length}</span>`:''}</div>`;
+  const L=p.day?DATA.lessons[p.day-1]:null,AX=!L&&DATA.appendix.pages.includes(no)?DATA.appendix:null;
+  const ps=L?L.pages:(AX?AX.pages:[]),i=ps.indexOf(no);
+  const last5=DATA.lessons[4].pages[DATA.lessons[4].pages.length-1];
+  const prev=ps.length?(i>0?ps[i-1]:(AX?last5:null)):(no>1?no-1:null),next=ps.length?(i<ps.length-1?ps[i+1]:null):(no<DATA.npages?no+1:null);
+  let h=head(L?L.color:'#1F3B73',L?`${L.n}차시 · ${L.ko}`:(AX?`부록 · ${ps[0]}–${ps[ps.length-1]}쪽`:'MY BIBLE CAMP'),`어린이 교재 ${no}쪽`,p.en+(p.ko&&p.ko!==p.en?' · '+p.ko:''),L?`#L${L.n}`:(AX?'#R':'#home'),L?'☰ 차시 순서':(AX?'☰ 부록 순서':'☰ 처음'));
+  if(ps.length)h+='<nav class="dots">'+ps.map(n=>`<a href="#${n}" class="${n===no?'on':''}${DATA.pages[n].audio?'':' na'}">${n}</a>`).join('')+'</nav>';
+  if(p.step)h+=`<div class="step"><b>${esc(p.step)}</b>${p.min?` <span>· 약 ${p.min}분</span>`:''}${ps.length?` <span class="of">${i+1}/${ps.length}</span>`:''}</div>`;
   if(p.patch)h+='<div class="note warn">📌 이 쪽은 <b>새 쪽(A4 라벨)을 덮어 붙인 쪽</b>이에요. 아직 안 붙였다면 콩·씨앗 내용은 건너뛰고, 아래 대본대로 진행하세요.</div>';
   if(p.todo)h+=`<div class="card todo"><div class="lab">지금 할 일</div>${esc(p.todo)}</div>`;
   if(p.acts){   /* 만들기 쪽 = 이 차시의 마지막 활동 시간: 활동 대본을 이 화면에서 바로 진행 */
@@ -52,8 +55,8 @@ function viewPage(no){
     if(two)h+=`<div class="sec">① ${esc(a.ko)}</div>`;
     h+=linesHtml(a.lines,!!a.audio);
     h+=`<details class="card"><summary>교사용 안내 (한국어) — 준비·진행·주의</summary>${a.teacher.map(t=>`<p><b>${esc(t[0])}</b><br>${esc(t[1])}</p>`).join('')}</details>`;
-    const nx=more.length?url('activity/'+more[0]+'.html'):(L&&L.n<5?`#L${L.n+1}`:'#59');
-    const nl=more.length?`② ${DATA.acts[more[0]].ko}`:(L&&L.n<5?`${L.n+1}차시 순서 보기`:'59쪽 기억할 말씀 (5일 요절 복습)');
+    const nx=more.length?url('activity/'+more[0]+'.html'):(L&&L.n<5?`#L${L.n+1}`:`#${DATA.review}`);
+    const nl=more.length?`② ${DATA.acts[more[0]].ko}`:(L&&L.n<5?`${L.n+1}차시 순서 보기`:`${DATA.review}쪽 기억할 말씀 (5일 요절 복습)`);
     h+=`<div class="card nextcard" id="nextcard">${more.length?'다음 활동':'이 차시 끝!'} → <a href="${nx}"><b>${esc(nl)}</b></a>`+
        (p.day===5?`<br>📦 2027년 10월 여는 날 대본: <a href="${url('activity/7.html')}">보기</a>`:'')+'</div>';
     app.innerHTML=h+footer()+bar(prev!=null?`#${prev}`:null,nx,true);bind(a.lines,a.audio);return;
@@ -63,7 +66,7 @@ function viewPage(no){
   if(p.sum&&L)h+=summaryHtml(L);
   if(p.acts)h+=actsHtml(p.acts.concat(p.day===5?[7]:[]));
   const np=next?DATA.pages[next]:null;
-  h+=`<div class="card nextcard" id="nextcard">${np?`다음 단계 → <a href="#${next}"><b>${next}쪽</b> · ${esc(np.step||np.en)}</a>`:(L?`이 차시의 마지막 쪽이에요. <a href="#L${L.n}">차시 순서 보기</a>`:'')}</div>`;
+  h+=`<div class="card nextcard" id="nextcard">${np?`다음 단계 → <a href="#${next}"><b>${next}쪽</b> · ${esc(np.step||np.en)}</a>`:(L?`이 차시의 마지막 쪽이에요. <a href="#L${L.n}">차시 순서 보기</a>`:(AX?`교재의 마지막 쪽이에요. 5일 동안 수고하셨어요! <a href="#home">처음 화면</a>`:''))}</div>`;
   h+=footer()+bar(prev!=null?`#${prev}`:null,next!=null?`#${next}`:null,p.lines.length&&p.lines[0].t0!==undefined||(!p.audio&&p.lines.some(l=>l.w)));
   app.innerHTML=h;bind(p.lines,p.audio);
 }
@@ -152,7 +155,7 @@ function viewLesson(n){
   let h=head(L.color,`${n}차시 · 진행 순서`,L.ko,L.en,'#home','☰ 처음');
   h+=`<a class="bigbtn" href="#${L.pages[0]}">▶ 1단계부터 시작 (어린이 교재 ${L.pages[0]}쪽)</a>`;
   h+=`<div class="card"><div class="lab">진행 순서 · 어린이 교재 ${L.pages[0]}–${L.pages[L.pages.length-1]}쪽 (수업 50분 + 활동)</div><ol class="steps">`+L.pages.map(no=>{const p=DATA.pages[no];
-    return `<li><a href="#${no}"><span class="pg">${no}쪽</span><span class="st">${esc(p.step||'')}</span><span class="tt">${esc(p.en)}</span>${p.min?`<span class="mn">${p.min}분</span>`:''}${p.audio?'<span class="au">🔊</span>':''}${p.qr?'':'<span class="qr" title="인쇄본에 QR 없음 — 스티커">🏷</span>'}</a></li>`;}).join('')+'</ol><p class="muted">🔊 영어 음성 · 🏷 인쇄본에 QR이 없는 쪽(QR 스티커를 붙이세요)</p></div>';
+    return `<li><a href="#${no}"><span class="pg">${no}쪽</span><span class="st">${esc(p.step||'')}</span><span class="tt">${esc(p.en)}</span>${p.min?`<span class="mn">${p.min}분</span>`:''}${p.audio?'<span class="au">🔊</span>':''}${p.qr||p.acts?'':'<span class="qr" title="인쇄본에 QR 없음 — 스티커">🏷</span>'}${p.acts?'<span class="qr" title="21번 활동 시간 라벨">🎨</span>':''}${p.patch?'<span class="qr" title="새 쪽 덮어 붙이기">📌</span>':''}</a></li>`;}).join('')+'</ol><p class="muted">🔊 영어 음성 · 🏷 QR 스티커(09번)를 붙일 쪽 · 🎨 활동 시간 라벨(21번) · 📌 새 쪽을 덮어 붙인 쪽(19번)</p></div>';
   h+=`<div class="card"><div class="lab">학습 목표</div><ul>${L.goals.map(g=>`<li>${esc(g)}</li>`).join('')}</ul></div>`;
   h+=`<div class="card"><div class="lab">준비물</div>${esc(L.mats)}<p><b>오늘의 실물</b> · ${esc(L.object.replace('오늘의 실물: ',''))}</p></div>`;
   h+=`<div class="card"><div class="lab">도입 (5분)</div>${esc(L.intro)}<div class="lab">정리 (5분)</div>${esc(L.close)}</div>`;
@@ -160,12 +163,21 @@ function viewLesson(n){
   h+=`<div class="card"><div class="lab">이럴 때는</div>${L.tips.map(t=>`<p><b>${esc(t[0])}</b><br>${esc(t[1])}</p>`).join('')}<div class="lab">주의</div>${esc(L.care)}</div>`;
   app.innerHTML=h+footer();
 }
+function viewAppendix(){
+  const AX=DATA.appendix,ps=AX.pages;
+  let h=head('#1F3B73',`부록 · ${ps[0]}–${ps[ps.length-1]}쪽`,AX.ko,AX.en,'#home','☰ 처음');
+  h+=`<a class="bigbtn" href="#${ps[0]}">▶ ${ps[0]}쪽부터 (Bible thoughts to remember)</a>`;
+  h+=`<div class="card"><div class="lab">부록 순서 · ${ps[0]}–${ps[ps.length-2]}쪽 부록, ${ps[ps.length-1]}쪽 Keep growing(마지막 쪽)</div><ol class="steps">`+ps.map(no=>{const p=DATA.pages[no];
+    return `<li><a href="#${no}"><span class="pg">${no}쪽</span><span class="st">${esc(p.step||'')}</span><span class="tt">${esc(p.en)}</span>${p.audio?'<span class="au">🔊</span>':''}${p.qr?'':'<span class="qr">🏷</span>'}${p.patch?'<span class="qr">📌</span>':''}</a></li>`;}).join('')+
+    '</ol><p class="muted">🔊 영어 음성 · 🏷 QR 스티커를 붙일 쪽 · 📌 새 쪽을 덮어 붙인 쪽</p></div>';
+  app.innerHTML=h+footer();
+}
 function summaryHtml(L){
   return `<div class="card sum"><div class="lab">정리 문장</div><p class="en">${esc(L.big.en)}</p><p class="ko">${esc(L.big.ko)}</p>
   <div class="lab">암송 요절</div><p class="en">${esc(L.memory.nkjv)} <small>(${esc(L.memory.ref)}, NKJV)</small></p><p class="ko">${esc(L.memory.krv)} <small>(${esc(L.memory.ref_ko)}, 개역한글)</small></p>
   <div class="lab">선생님 반문</div><ul>${L.questions.map(q=>`<li>${esc(q)}</li>`).join('')}</ul>
   <div class="lab">영어 진행문 (선생님이 읽어 줄 말)</div><p class="en">${esc(L.english)}</p>
-  <p class="muted">5일 요절을 모아 읽기 → <a href="#59">59쪽 기억할 말씀 (Bible thoughts to remember)</a></p></div>`;
+  <p class="muted">5일 요절을 모아 읽기 → <a href="#${DATA.review}">${DATA.review}쪽 기억할 말씀 (Bible thoughts to remember)</a></p></div>`;
 }
 function actsHtml(ids){return '<div class="card acts"><div class="lab">활동 (활동지 QR과 같은 화면)</div>'+ids.map(k=>{const a=DATA.acts[k];return `<a class="actbtn" href="${url('activity/'+k+'.html')}">${k===7?'📦':'🎨'} ${esc(a.ko)}<small>${a.day}차시 · ${esc(a.en)}</small></a>`;}).join('')+'</div>';}
 
@@ -193,13 +205,13 @@ function viewHome(){
   let h=`<header class="top"><small>MY BIBLE CAMP · 교사 네비게이션</small><h1>필리핀 5일 성경학교</h1><p class="sub">${esc(DATA.book)} 기준 · 인터넷 없이도 사용</p></header>`;
   h+=`<div class="card"><div class="lab">사용법</div><ol class="howto"><li>어린이 교재 쪽 아래의 <b>QR</b>을 찍으면 그 쪽 화면이 열려요. QR이 없는 쪽은 QR 스티커를 붙이거나 아래 차시 버튼으로 들어가요.</li><li><b>▶ 재생</b>: 영어 음성이 나오고 <span class="hl">지금 읽는 줄</span>이 칠해져요. 줄을 누르면 거기부터 다시 들려요.</li><li>회색 글씨 = <b>한국어 뜻</b> · 주황 줄 = <b>선생님이 할 일</b> · ⏸ = 아이들이 답하거나 쓰는 시간(자동 멈춤 → 다 되면 ▶).</li><li>쪽이 끝나면 <b>다음 ▶</b> — 수업 순서대로 다음 쪽으로 가요.</li></ol></div>`;
   h+='<div class="lessons">'+DATA.lessons.map(L=>`<a class="lesson" style="--lc:${L.color}" href="#L${L.n}"><b>${L.n}차시</b> ${esc(L.ko)}<small>${esc(L.en)} · 어린이 교재 ${L.pages[0]}–${L.pages[L.pages.length-1]}쪽</small></a>`).join('')+
-     '<a class="lesson" style="--lc:#1F3B73" href="#59"><b>📖 59쪽</b> 기억할 말씀 — 5일 요절 모아 읽기<small>Bible thoughts to remember · 영어 음성 · 한국어 뜻</small></a></div>';
+     `<a class="lesson" style="--lc:#1F3B73" href="#R"><b>📖 부록</b> 기억할 말씀 · 기도 · 집에서 읽기 · 낱말 카드 · Keep growing<small>Bible thoughts to remember ${DATA.appendix.pages[0]}쪽 ~ Keep growing ${DATA.appendix.pages[DATA.appendix.pages.length-1]}쪽(마지막 쪽)</small></a></div>`;
   h+=actsHtml([1,2,3,6,4,5,7]);
   h+=`<div class="card"><div class="lab">인터넷 없이 쓰기</div><p>와이파이에서 아래 버튼을 한 번 누르면 모든 쪽·음성(약 ${Math.round((DATA.bytes||0)/1e6)}MB)이 이 휴대폰에 저장돼요. 저장한 휴대폰·브라우저(아이폰 Safari, 안드로이드 Chrome) 그대로 열어야 해요. 아이폰은 7일 넘게 안 열면 지워질 수 있으니 수업 전날 한 번 더 열어 두세요.</p><button id="save" class="bigbtn">⬇ 모두 저장 (오프라인)</button><p id="savest" class="muted"></p></div>`;
-  h+='<div class="card"><div class="lab">쪽 번호로 바로 가기</div><div class="jump"><input id="jn" type="number" inputmode="numeric" min="1" max="64" placeholder="예: 37"><button id="jg">열기</button></div><p class="muted">인쇄된 어린이 교재(64쪽)의 쪽 번호예요.</p></div>';
+  h+=`<div class="card"><div class="lab">쪽 번호로 바로 가기</div><div class="jump"><input id="jn" type="number" inputmode="numeric" min="1" max="${DATA.npages}" placeholder="예: 40"><button id="jg">열기</button></div><p class="muted">인쇄된 어린이 교재(${DATA.npages}쪽)의 쪽 번호예요.</p></div>`;
   app.innerHTML=h+footer();
   $('#save').onclick=saveAll;checkSaved();
-  $('#jg').onclick=()=>{const v=+$('#jn').value;if(v>=1&&v<=64)location.hash=String(v);};
+  $('#jg').onclick=()=>{const v=+$('#jn').value;if(v>=1&&v<=DATA.npages)location.hash=String(v);};
 }
 async function saveAll(){
   const st=$('#savest');if(!('caches' in window)){st.textContent='이 브라우저는 저장을 지원하지 않아요.';return;}
