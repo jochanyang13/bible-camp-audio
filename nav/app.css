@@ -35,6 +35,11 @@ header.top .sub{margin:4px 0 0;opacity:.92;font-size:14px}
 .who.wt{background:#EDE3F7;color:#5E3A8C}.who.we{background:#FDE6EF;color:#A0335F}
 .en{font-size:19px;font-weight:650;line-height:1.45}
 .ko{font-size:15px;color:var(--mut);margin-top:4px;line-height:1.5}
+.en2{font-size:14px;color:#3E5C8A;margin-top:4px;line-height:1.45;font-style:italic}
+.ab{font-size:11px;font-weight:800;color:#3E5C8A;background:#E6EEF8;border-radius:6px;padding:0 5px;font-style:normal;vertical-align:middle}
+.lang{display:inline-flex;border-radius:10px;overflow:hidden;border:1px solid #cfd6dd}
+.lang button{border:0!important;border-radius:0!important;padding:6px 10px!important;background:#fff!important;font-size:13px!important;font-weight:700;color:var(--ink)}
+.lang button.on{background:var(--c)!important;color:#fff!important}
 .act{display:inline-block;margin-top:6px;background:#FFF0DE;color:var(--act);border-radius:8px;padding:3px 9px;font-size:14px;font-weight:600}
 .wait{margin-top:6px;font-size:13px;color:#8a6400;font-weight:700}
 .sum .en{font-weight:650}.sum .ko{color:var(--mut)}

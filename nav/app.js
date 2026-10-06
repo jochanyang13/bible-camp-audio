@@ -7,6 +7,10 @@ const app=document.getElementById('app');
 const au=new Audio();au.preload='auto';
 let DATA=null,lines=[],cur=-1,objUrl=null,playing=false,raf=0,ttsMode=false,ttsIdx=0,waitIdx=null,waitT0=0,waitIv=0,loadTok=0,userScrollT=0;
 let autoPause=localStorage.getItem('nav_ap')!=='0';
+let lang=localStorage.getItem('nav_lang')==='tl'?'tl':'en';   /* 음성 언어: en 영어 · tl 따갈로그 */
+function setLang(l){lang=l;localStorage.setItem('nav_lang',l);route();}
+function langSw(){return `<span class="lang" role="group" aria-label="음성 언어"><button data-l="en" class="${lang==='en'?'on':''}">🇺🇸 English</button><button data-l="tl" class="${lang==='tl'?'on':''}">🇵🇭 Tagalog</button></span>`;}
+function bindLang(){document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{if(b.dataset.l!==lang)setLang(b.dataset.l);});}
 const $=(s,el=document)=>el.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const url=p=>ROOT+p;
@@ -20,7 +24,7 @@ addEventListener('touchmove',()=>userScrollT=Date.now(),{passive:true});
 addEventListener('wheel',()=>userScrollT=Date.now(),{passive:true});
 
 function route(){
-  stopAll();let h=decodeURIComponent(location.hash.slice(1));
+  stopAll();lang=localStorage.getItem('nav_lang')==='tl'?'tl':'en';let h=decodeURIComponent(location.hash.slice(1));
   if(!h&&FIXED)h=FIXED;scrollTo(0,0);
   if(/^\d+$/.test(h))return viewPage(+h);
   if(/^L[1-5]$/.test(h))return viewLesson(+h[1]);
@@ -34,7 +38,7 @@ function head(color,small,title,sub,back,backLab){
   return `<header class="top"><div class="row"><a class="back" href="${back}">${backLab}</a>${back==='#home'?'':`<a class="back" href="${url('index.html')}#home">⌂ 처음</a>`}</div>
   <small>${esc(small)}</small><h1>${esc(title)}</h1>${sub?`<p class="sub">${esc(sub)}</p>`:''}</header>`;
 }
-function footer(){return '<footer>Scripture taken from the New King James Version®. Copyright © 1982 by Thomas Nelson. Used by permission. All rights reserved. · 한국어 성구: 개역한글 · Voice: ElevenLabs · Free copy — not for sale</footer>';}
+function footer(){return '<footer>Scripture taken from the New King James Version®. Copyright © 1982 by Thomas Nelson. Used by permission. All rights reserved. · Tagalog Scripture: Ang Biblia © 2001 Philippine Bible Society (AB) · 한국어 성구: 개역한글 · Voice: ElevenLabs · Free copy — not for sale</footer>';}
 
 /* ---------- 쪽 화면 ---------- */
 function viewPage(no){
@@ -59,22 +63,25 @@ function viewPage(no){
     const nl=more.length?`② ${DATA.acts[more[0]].ko}`:(L&&L.n<5?`${L.n+1}차시 순서 보기`:`${DATA.review}쪽 기억할 말씀 (5일 요절 복습)`);
     h+=`<div class="card nextcard" id="nextcard">${more.length?'다음 활동':'이 차시 끝!'} → <a href="${nx}"><b>${esc(nl)}</b></a>`+
        (p.day===5?`<br>📦 2027년 10월 여는 날 대본: <a href="${url('activity/7.html')}">보기</a>`:'')+'</div>';
-    app.innerHTML=h+footer()+bar(prev!=null?`#${prev}`:null,nx,true);bind(a.lines,a.audio);return;
+    app.innerHTML=h+footer()+bar(prev!=null?`#${prev}`:null,nx,true);bind(a.lines,a.audio,a.audio_tl);return;
   }
-  h+=linesHtml(p.lines,!!p.audio);
+  h+=tlNote(p.audio,p.audio_tl)+linesHtml(p.lines,!!p.audio);
   if(p.answer)h+=`<div class="card ans"><div class="lab">정답·확인</div>${esc(p.answer)}</div>`;
   if(p.sum&&L)h+=summaryHtml(L);
   if(p.acts)h+=actsHtml(p.acts.concat(p.day===5?[7]:[]));
   const np=next?DATA.pages[next]:null;
   h+=`<div class="card nextcard" id="nextcard">${np?`다음 단계 → <a href="#${next}"><b>${next}쪽</b> · ${esc(np.step||np.en)}</a>`:(L?`이 차시의 마지막 쪽이에요. <a href="#L${L.n}">차시 순서 보기</a>`:(AX?`교재의 마지막 쪽이에요. 5일 동안 수고하셨어요! <a href="#home">처음 화면</a>`:''))}</div>`;
   h+=footer()+bar(prev!=null?`#${prev}`:null,next!=null?`#${next}`:null,p.lines.length&&p.lines[0].t0!==undefined||(!p.audio&&p.lines.some(l=>l.w)));
-  app.innerHTML=h;bind(p.lines,p.audio);
+  app.innerHTML=h;bind(p.lines,p.audio,p.audio_tl);
 }
+function tlNote(rel,relTl){return lang==='tl'&&rel&&!relTl?'<div class="note warn">🇵🇭 이 쪽은 따갈로그 음성이 아직 없어요. 글은 따갈로그로 보이고, ▶ 재생은 영어 음성으로 나와요.</div>':'';}
 function linesHtml(ls,timed){
   if(!ls||!ls.length)return '';
-  return '<div class="lines">'+ls.map((l,i)=>{const w=WHO[l.w];
+  const T=lang==='tl';
+  return '<div class="lines">'+ls.map((l,i)=>{const w=WHO[l.w],tl=T&&l.tl;
     return (l.s?`<div class="sec">${esc(l.s)}</div>`:'')+`<div class="ln${timed?' t':''}" data-i="${i}">`+
-    (w?`<div class="who w${w[0]}">${w[1]} ${esc(l.w)}</div>`:'')+`<div class="en">${esc(l.en)}</div>`+(l.ko?`<div class="ko">${esc(l.ko)}</div>`:'')+
+    (w?`<div class="who w${w[0]}">${w[1]} ${esc(l.w)}</div>`:'')+
+    (tl?`<div class="en" lang="fil">${esc(l.tl)}${l.k==='verse'?' <small class="ab">AB</small>':''}</div><div class="en2" lang="en">${esc(l.en)}</div>`:`<div class="en">${esc(l.en)}</div>`)+(l.ko?`<div class="ko">${esc(l.ko)}</div>`:'')+
     (l.a?`<div class="act">${esc(l.a)}</div>`:'')+(l.wait?`<div class="wait">⏸ 여기서 음성이 멈춰요 · 아이들 활동 ${esc(l.wait)} → 다 되면 ▶</div>`:'')+'</div>';}).join('')+'</div>';
 }
 function bar(prevH,nextH,canPlay){
@@ -82,15 +89,17 @@ function bar(prevH,nextH,canPlay){
   <a class="nav${prevH?'':' dis'}"${prevH?` href="${prevH}"`:''}>◀ 이전</a>
   ${canPlay?'<button id="b_back" aria-label="한 줄 앞">⏮</button><button id="b_play" class="play">▶ 재생</button><button id="b_fwd" aria-label="한 줄 뒤">⏭</button>':'<span class="noaudio">음성 없는 쪽</span>'}
   <a class="nav${nextH?'':' dis'}"${nextH?` href="${nextH}"`:''}>다음 ▶</a></div>
-  ${canPlay?`<div class="opts"><label><input type="checkbox" id="o_ap"${autoPause?' checked':''}> 활동 칸에서 자동 멈춤</label><button id="b_speed">속도 1×</button></div>`:''}</div>`;
+  ${canPlay?`<div class="opts"><label><input type="checkbox" id="o_ap"${autoPause?' checked':''}> 자동 멈춤</label>${langSw()}<button id="b_speed">속도 1×</button></div>`:''}</div>`;
 }
 
 /* ---------- 음성 + 색칠 진행 ---------- */
-function bind(ls,rel){
-  lines=(ls||[]).map(l=>Object.assign({},l));cur=-1;waitIdx=null;
+function bind(ls,rel,relTl){
+  const T=lang==='tl'&&!!relTl;   /* 따갈로그 음성이 있으면 그 음성과 시각(tl0·tl1)으로 색칠 */
+  lines=(ls||[]).map(l=>Object.assign({},l,T?{t0:l.tl0,t1:l.tl1}:{}));cur=-1;waitIdx=null;
   document.querySelectorAll('.ln').forEach(el=>el.onclick=()=>seekLine(+el.dataset.i));
+  bindLang();
   const bp=$('#b_play');if(!bp)return;
-  ttsMode=!rel;if(rel)loadAudio(rel);
+  rel=T?relTl:rel;ttsMode=!rel;if(rel)loadAudio(rel);
   bp.onclick=toggle;$('#b_back').onclick=()=>seekLine(Math.max(0,cur-1));$('#b_fwd').onclick=()=>seekLine(Math.min(lines.length-1,cur+1));
   $('#o_ap').onchange=e=>{autoPause=e.target.checked;localStorage.setItem('nav_ap',autoPause?'1':'0');};
   $('#b_speed').onclick=e=>{const r=au.playbackRate>=1?0.85:1;au.playbackRate=r;e.target.textContent='속도 '+(r<1?'0.85×':'1×');};
@@ -125,7 +134,9 @@ function seekLine(i){
   if(i<0||i>=lines.length)return;
   if(ttsMode){speechSynthesis.cancel();hideWait();speakFrom(i);return;}
   if(lines[i].t0===undefined)return;
-  lines.forEach((l,k)=>{if(k>=i)l._w=false;});hideWait();au.currentTime=lines[i].t0;mark(i);if(au.paused)au.play().catch(()=>{});
+  lines.forEach((l,k)=>{if(k>=i)l._w=false;});hideWait();mark(i);
+  if(au.readyState<1){au.addEventListener('loadedmetadata',()=>{au.currentTime=lines[i].t0;au.play().catch(()=>{});},{once:true});return;}   /* 음성을 아직 불러오는 중이면 다 불러온 뒤 그 줄로 */
+  au.currentTime=lines[i].t0;if(au.paused)au.play().catch(()=>{});
 }
 function showWait(i){
   waitIdx=i;const el=document.querySelectorAll('.ln')[i];if(el)el.classList.add('waiting');waitT0=Date.now();
@@ -141,8 +152,9 @@ function speakFrom(i){
 }
 function speakNext(){
   if(ttsIdx>=lines.length){mark(-2);label('▶ 다시');showNext();return;}
-  mark(ttsIdx);const u=new SpeechSynthesisUtterance(lines[ttsIdx].en);u.lang='en-US';u.rate=.9;
-  const v=speechSynthesis.getVoices().find(v=>/^en(-|_)(US|GB|PH)/i.test(v.lang));if(v)u.voice=v;
+  mark(ttsIdx);const l0=lines[ttsIdx],vs=speechSynthesis.getVoices(),fv=lang==='tl'&&l0.tl?vs.find(v=>/^(fil|tl)/i.test(v.lang)):null;
+  const u=new SpeechSynthesisUtterance(fv?l0.tl:l0.en);u.lang=fv?fv.lang:'en-US';u.rate=.9;   /* 휴대폰에 필리핀어 목소리가 없으면 영어로 읽어요 */
+  const v=fv||vs.find(v=>/^en(-|_)(US|GB|PH)/i.test(v.lang));if(v)u.voice=v;
   u.onend=()=>{const l=lines[ttsIdx];ttsIdx++;if(autoPause&&l&&l.wait){showWait(ttsIdx-1);return;}setTimeout(speakNext,500);};
   speechSynthesis.speak(u);label('⏸ 멈춤');
 }
@@ -155,7 +167,7 @@ function viewLesson(n){
   let h=head(L.color,`${n}차시 · 진행 순서`,L.ko,L.en,'#home','☰ 처음');
   h+=`<a class="bigbtn" href="#${L.pages[0]}">▶ 1단계부터 시작 (어린이 교재 ${L.pages[0]}쪽)</a>`;
   h+=`<div class="card"><div class="lab">진행 순서 · 어린이 교재 ${L.pages[0]}–${L.pages[L.pages.length-1]}쪽 (수업 50분 + 활동)</div><ol class="steps">`+L.pages.map(no=>{const p=DATA.pages[no];
-    return `<li><a href="#${no}"><span class="pg">${no}쪽</span><span class="st">${esc(p.step||'')}</span><span class="tt">${esc(p.en)}</span>${p.min?`<span class="mn">${p.min}분</span>`:''}${p.audio?'<span class="au">🔊</span>':''}${p.qr||p.acts?'':'<span class="qr" title="인쇄본에 QR 없음 — 스티커">🏷</span>'}${p.acts?'<span class="qr" title="21번 활동 시간 라벨">🎨</span>':''}${p.patch?'<span class="qr" title="새 쪽 덮어 붙이기">📌</span>':''}</a></li>`;}).join('')+'</ol><p class="muted">🔊 영어 음성 · 🏷 QR 스티커(09번)를 붙일 쪽 · 🎨 활동 시간 라벨(21번) · 📌 새 쪽을 덮어 붙인 쪽(19번)</p></div>';
+    return `<li><a href="#${no}"><span class="pg">${no}쪽</span><span class="st">${esc(p.step||'')}</span><span class="tt">${esc(p.en)}</span>${p.min?`<span class="mn">${p.min}분</span>`:''}${p.audio?'<span class="au">🔊</span>':''}${p.audio_tl||(p.acts&&DATA.acts[p.acts[0]].audio_tl)?'<span class="au" title="따갈로그 음성">🇵🇭</span>':''}${p.qr||p.acts?'':'<span class="qr" title="인쇄본에 QR 없음 — 스티커">🏷</span>'}${p.acts?'<span class="qr" title="21번 활동 시간 라벨">🎨</span>':''}${p.patch?'<span class="qr" title="새 쪽 덮어 붙이기">📌</span>':''}</a></li>`;}).join('')+'</ol><p class="muted">🔊 영어 음성 · 🇵🇭 따갈로그 음성 · 🏷 QR 스티커(09번)를 붙일 쪽 · 🎨 활동 시간 라벨(21번) · 📌 새 쪽을 덮어 붙인 쪽(19번)</p></div>';
   h+=`<div class="card"><div class="lab">학습 목표</div><ul>${L.goals.map(g=>`<li>${esc(g)}</li>`).join('')}</ul></div>`;
   h+=`<div class="card"><div class="lab">준비물</div>${esc(L.mats)}<p><b>오늘의 실물</b> · ${esc(L.object.replace('오늘의 실물: ',''))}</p></div>`;
   h+=`<div class="card"><div class="lab">도입 (5분)</div>${esc(L.intro)}<div class="lab">정리 (5분)</div>${esc(L.close)}</div>`;
@@ -168,13 +180,13 @@ function viewAppendix(){
   let h=head('#1F3B73',`부록 · ${ps[0]}–${ps[ps.length-1]}쪽`,AX.ko,AX.en,'#home','☰ 처음');
   h+=`<a class="bigbtn" href="#${ps[0]}">▶ ${ps[0]}쪽부터 (Bible thoughts to remember)</a>`;
   h+=`<div class="card"><div class="lab">부록 순서 · ${ps[0]}–${ps[ps.length-2]}쪽 부록, ${ps[ps.length-1]}쪽 Keep growing(마지막 쪽)</div><ol class="steps">`+ps.map(no=>{const p=DATA.pages[no];
-    return `<li><a href="#${no}"><span class="pg">${no}쪽</span><span class="st">${esc(p.step||'')}</span><span class="tt">${esc(p.en)}</span>${p.audio?'<span class="au">🔊</span>':''}${p.qr?'':'<span class="qr">🏷</span>'}${p.patch?'<span class="qr">📌</span>':''}</a></li>`;}).join('')+
-    '</ol><p class="muted">🔊 영어 음성 · 🏷 QR 스티커를 붙일 쪽 · 📌 새 쪽을 덮어 붙인 쪽</p></div>';
+    return `<li><a href="#${no}"><span class="pg">${no}쪽</span><span class="st">${esc(p.step||'')}</span><span class="tt">${esc(p.en)}</span>${p.audio?'<span class="au">🔊</span>':''}${p.audio_tl?'<span class="au">🇵🇭</span>':''}${p.qr?'':'<span class="qr">🏷</span>'}${p.patch?'<span class="qr">📌</span>':''}</a></li>`;}).join('')+
+    '</ol><p class="muted">🔊 영어 음성 · 🇵🇭 따갈로그 음성 · 🏷 QR 스티커를 붙일 쪽 · 📌 새 쪽을 덮어 붙인 쪽</p></div>';
   app.innerHTML=h+footer();
 }
 function summaryHtml(L){
   return `<div class="card sum"><div class="lab">정리 문장</div><p class="en">${esc(L.big.en)}</p><p class="ko">${esc(L.big.ko)}</p>
-  <div class="lab">암송 요절</div><p class="en">${esc(L.memory.nkjv)} <small>(${esc(L.memory.ref)}, NKJV)</small></p><p class="ko">${esc(L.memory.krv)} <small>(${esc(L.memory.ref_ko)}, 개역한글)</small></p>
+  <div class="lab">암송 요절</div><p class="en">${esc(L.memory.nkjv)} <small>(${esc(L.memory.ref)}, NKJV)</small></p>${L.memory.ab?`<p class="en2" lang="fil">${esc(L.memory.ab)} <small>(${esc(L.memory.ref_tl)}, AB)</small></p>`:''}<p class="ko">${esc(L.memory.krv)} <small>(${esc(L.memory.ref_ko)}, 개역한글)</small></p>
   <div class="lab">선생님 반문</div><ul>${L.questions.map(q=>`<li>${esc(q)}</li>`).join('')}</ul>
   <div class="lab">영어 진행문 (선생님이 읽어 줄 말)</div><p class="en">${esc(L.english)}</p>
   <p class="muted">5일 요절을 모아 읽기 → <a href="#${DATA.review}">${DATA.review}쪽 기억할 말씀 (Bible thoughts to remember)</a></p></div>`;
@@ -189,14 +201,14 @@ function viewAct(n){
   h+=n===7?'<div class="step"><b>2027년 10월 · 기도 캡슐 여는 날</b> <span>· 예산교회 선교팀과 함께</span></div>'
           :`<div class="step"><b>마지막 단계 · 활동 시간</b> <span>· 어린이 교재 ${a.craft}쪽(만들기 쪽)${L.acts.filter(k=>k!==7).length>1?` · ${L.acts.indexOf(n)+1}/2`:''}</span></div>`;
   h+=`<div class="card todo"><div class="lab">자료</div>${esc(a.sheet)}${a.mat?'<br>'+esc(a.mat):''}</div>`;
-  h+='<div class="card"><div class="lab">사용법</div>▶ 재생을 누르면 영어 음성이 나오고 <span class="hl">지금 읽는 줄</span>이 칠해져요. 회색 글씨는 한국어 뜻, 주황 줄은 선생님이 할 일. ⏸ 표시에서는 음성이 자동으로 멈춰요 — 아이들이 다 하면 ▶ 계속.</div>';
-  h+=linesHtml(a.lines,!!a.audio);
+  h+=`<div class="card"><div class="lab">사용법</div>▶ 재생을 누르면 ${lang==='tl'?'따갈로그':'영어'} 음성이 나오고 <span class="hl">지금 읽는 줄</span>이 칠해져요. 회색 글씨는 한국어 뜻, 주황 줄은 선생님이 할 일. ⏸ 표시에서는 음성이 자동으로 멈춰요 — 아이들이 다 하면 ▶ 계속. 아래 막대의 🇺🇸 English / 🇵🇭 Tagalog로 언어를 바꿔요.</div>`;
+  h+=tlNote(a.audio,a.audio_tl)+linesHtml(a.lines,!!a.audio);
   h+=`<details class="card"><summary>교사용 안내 (한국어) — 준비·진행·주의</summary>${a.teacher.map(t=>`<p><b>${esc(t[0])}</b><br>${esc(t[1])}</p>`).join('')}</details>`;
   if(n===5)h+=`<div class="card"><a href="${url('activity/7.html')}">📦 2027년 10월 여는 날 대본 →</a></div>`;
   if(n===7)h+=`<div class="card"><a href="${url('activity/5.html')}">← 봉인하는 날(5차시) 대본</a></div>`;
   h+=`<div class="card nextcard" id="nextcard">${others.length?'같은 차시 다른 활동 → '+others.map(k=>`<a href="${url('activity/'+k+'.html')}"><b>${esc(DATA.acts[k].ko)}</b></a>`).join(' · '):`활동 끝! <a href="${url('index.html')}#L${a.day}">${a.day}차시 순서로</a>`}</div>`;
   const nx=others.length?url('activity/'+others[0]+'.html'):`${url('index.html')}#L${a.day}`;
-  app.innerHTML=h+footer()+bar(`${url('index.html')}#${a.craft}`,nx,true);bind(a.lines,a.audio);
+  app.innerHTML=h+footer()+bar(`${url('index.html')}#${a.craft}`,nx,true);bind(a.lines,a.audio,a.audio_tl);
 }
 
 /* ---------- 처음 화면 ---------- */
@@ -204,12 +216,13 @@ function viewHome(){
   theme('#1F3B73');
   let h=`<header class="top"><small>MY BIBLE CAMP · 교사 네비게이션</small><h1>필리핀 5일 성경학교</h1><p class="sub">${esc(DATA.book)} 기준 · 인터넷 없이도 사용</p></header>`;
   h+=`<div class="card"><div class="lab">사용법</div><ol class="howto"><li>어린이 교재 쪽 아래의 <b>QR</b>을 찍으면 그 쪽 화면이 열려요. QR이 없는 쪽은 QR 스티커를 붙이거나 아래 차시 버튼으로 들어가요.</li><li><b>▶ 재생</b>: 영어 음성이 나오고 <span class="hl">지금 읽는 줄</span>이 칠해져요. 줄을 누르면 거기부터 다시 들려요.</li><li>회색 글씨 = <b>한국어 뜻</b> · 주황 줄 = <b>선생님이 할 일</b> · ⏸ = 아이들이 답하거나 쓰는 시간(자동 멈춤 → 다 되면 ▶).</li><li>쪽이 끝나면 <b>다음 ▶</b> — 수업 순서대로 다음 쪽으로 가요.</li></ol></div>`;
+  h+=`<div class="card"><div class="lab">음성 언어</div>${langSw()}<p class="muted">🇺🇸 English: 교재 글 그대로(NKJV) · 🇵🇭 Tagalog: 같은 내용을 따갈로그로(성구는 Ang Biblia 2001 · AB). 따갈로그를 고르면 따갈로그 줄이 칠해지고, 그 밑에 교재 영어 글과 한국어 뜻이 나와요. 한 번 고르면 모든 쪽에 그대로 적용돼요.</p></div>`;
   h+='<div class="lessons">'+DATA.lessons.map(L=>`<a class="lesson" style="--lc:${L.color}" href="#L${L.n}"><b>${L.n}차시</b> ${esc(L.ko)}<small>${esc(L.en)} · 어린이 교재 ${L.pages[0]}–${L.pages[L.pages.length-1]}쪽</small></a>`).join('')+
      `<a class="lesson" style="--lc:#1F3B73" href="#R"><b>📖 부록</b> 기억할 말씀 · 기도 · 집에서 읽기 · 낱말 카드 · Keep growing<small>Bible thoughts to remember ${DATA.appendix.pages[0]}쪽 ~ Keep growing ${DATA.appendix.pages[DATA.appendix.pages.length-1]}쪽(마지막 쪽)</small></a></div>`;
   h+=actsHtml([1,2,3,6,4,5,7]);
   h+=`<div class="card"><div class="lab">인터넷 없이 쓰기</div><p>와이파이에서 아래 버튼을 한 번 누르면 모든 쪽·음성(약 ${Math.round((DATA.bytes||0)/1e6)}MB)이 이 휴대폰에 저장돼요. 저장한 휴대폰·브라우저(아이폰 Safari, 안드로이드 Chrome) 그대로 열어야 해요. 아이폰은 7일 넘게 안 열면 지워질 수 있으니 수업 전날 한 번 더 열어 두세요.</p><button id="save" class="bigbtn">⬇ 모두 저장 (오프라인)</button><p id="savest" class="muted"></p></div>`;
   h+=`<div class="card"><div class="lab">쪽 번호로 바로 가기</div><div class="jump"><input id="jn" type="number" inputmode="numeric" min="1" max="${DATA.npages}" placeholder="예: 40"><button id="jg">열기</button></div><p class="muted">인쇄된 어린이 교재(${DATA.npages}쪽)의 쪽 번호예요.</p></div>`;
-  app.innerHTML=h+footer();
+  app.innerHTML=h+footer();bindLang();
   $('#save').onclick=saveAll;checkSaved();
   $('#jg').onclick=()=>{const v=+$('#jn').value;if(v>=1&&v<=DATA.npages)location.hash=String(v);};
 }
